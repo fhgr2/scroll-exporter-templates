@@ -1,7 +1,15 @@
 Attribute VB_Name = "Macros"
 Sub ExitReadingLayout()
-    Call FixExport
-    Call FixIdentification
+    If IsExported() Then
+        If ShouldRunOnceAfterExport() Then
+            Call FixExport
+            Call FixIdentification
+            SetRun (True)
+        Else
+            SetRun (False)
+        End If
+    End If
+
 End Sub
 
 Sub FixExport()
