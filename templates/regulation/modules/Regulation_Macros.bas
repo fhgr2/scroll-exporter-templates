@@ -1,9 +1,10 @@
-Attribute VB_Name = "Macros"
+Attribute VB_Name = "Regulation_Macros"
 Sub ExitReadingLayout()
     If IsExported() Then
         If ShouldRunOnceAfterExport() Then
             Call FixExport
             Call FixIdentification
+            Call FixTables
             SetRun (True)
         Else
             SetRun (False)
@@ -88,3 +89,19 @@ Sub FixIdentification()
                 
     Next
 End Sub
+
+' Tables in Panels
+Sub FixTables()
+    Dim tbl As Table
+    
+    For Each tbl In ActiveDocument.Sections(2).Range.Tables
+        If tbl.Style = "Scroll Panel" Then
+            ' Debug.Print (tbl.Style)
+            tbl.Style = "Scroll Section Column"
+            tbl.PreferredWidthType = wdPreferredWidthPoints
+            tbl.PreferredWidth = CentimetersToPoints(16)
+            tbl.Rows.LeftIndent = tbl.Rows.LeftIndent - CentimetersToPoints(5.2)
+        End If
+    Next
+End Sub
+
