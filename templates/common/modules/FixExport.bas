@@ -1,4 +1,10 @@
 Attribute VB_Name = "FixExport"
+' See https://github.com/htwchur/scroll-exporter-templates/issues/14
+Sub FixTableOfContents()
+    For Each toc In ActiveDocument.TablesOfContents
+        toc.Update
+    Next
+End Sub
 Sub FixPlaceholders(section As Integer, style As String)
     Dim shp As Shape
     Dim str As String
