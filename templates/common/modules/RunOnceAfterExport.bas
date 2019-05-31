@@ -8,7 +8,7 @@ Sub SetShouldRunOnceAfterExport(hasRun As Boolean)
 End Sub
 
 Public Function IsExported() As Boolean
-    IsExported = Not (ActiveDocument.Range.Find.Execute("$scroll.title"))
+    IsExported = Not (ActiveDocument.Range.Find.Execute("$scroll.content"))
 End Function
 
 Private Sub EnsureHasBooleanCustomPropertyIfNeeded(name As String)
@@ -72,4 +72,6 @@ Set dp = GetCustomProperty(name)
 dp.Value = hasRun
 
 End Sub
+
+
 
