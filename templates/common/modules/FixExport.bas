@@ -34,12 +34,11 @@ Sub SetDocumentPropertyFromShape(id, name As String)
     End If
 End Sub
 
-
-Sub FixPlaceholders(section As Integer, style As String)
+Sub FixPlaceholdersInRange(rangeObj As Range, style As String)
     Dim shp As Shape
     Dim str As String
 
-    For Each shp In ActiveDocument.Sections(section).Range.ShapeRange
+    For Each shp In rangeObj.ShapeRange
         ' only fix text boxes
         If (shp.Type = MsoShapeType.msoTextBox) Then
             
@@ -61,6 +60,20 @@ Sub FixPlaceholders(section As Integer, style As String)
         End If
     Next
 End Sub
+Sub FixPlaceholders(section As Integer, style As String)
+    FixPlaceholdersInRange (ActiveDocument.Sections(section).Range)
+End Sub
+
+Sub FixAllPlaceholdersInHeadersFooters(style As String)
+    Dim sectionObj As section
+    Dim rangeObj As Range
+    
+    For Each sectionObj In ActiveDocument.Sections
+        For Each rangeObj In sectionObj.Headers
+            Call FixPlaceholdersInRange(rangeObj, style)
+        Next
+    Next
+End Sub
 
 Sub FixBold(section As Integer)
     Set myRange = ActiveDocument.Sections(section).Range
@@ -68,7 +81,7 @@ Sub FixBold(section As Integer)
     oFind.ClearFormatting
     oFind.Font.Bold = True
     ' oFind.Style = ActiveDocument.Styles("Hervorhebung")
-    oFind.Text = ""
+    oFind.text = ""
     oFind.Forward = True
     oFind.Format = True
     With oFind.Replacement
