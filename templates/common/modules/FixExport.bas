@@ -62,3 +62,19 @@ Sub FixPlaceholders(section As Integer, style As String)
     Next
 End Sub
 
+Sub FixBold(section As Integer)
+    Set myRange = ActiveDocument.Sections(section).Range
+    Set oFind = myRange.Find
+    oFind.ClearFormatting
+    oFind.Font.Bold = True
+    ' oFind.Style = ActiveDocument.Styles("Hervorhebung")
+    oFind.Text = ""
+    oFind.Forward = True
+    oFind.Format = True
+    With oFind.Replacement
+        .ClearFormatting
+        .Font.Bold = False
+        .style = ActiveDocument.Styles("Intensive Hervorhebung")
+    End With
+    oFind.Execute FindText:="", ReplaceWith:="", Format:=True, Replace:=wdReplaceAll
+End Sub
