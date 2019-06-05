@@ -1,4 +1,3 @@
-Attribute VB_Name = "FixExport"
 ' See https://github.com/htwchur/scroll-exporter-templates/issues/14
 Sub FixTableOfContents()
     For Each toc In ActiveDocument.TablesOfContents
@@ -61,16 +60,20 @@ Sub FixPlaceholdersInRange(rangeObj As Range, style As String)
     Next
 End Sub
 Sub FixPlaceholders(section As Integer, style As String)
-    FixPlaceholdersInRange (ActiveDocument.Sections(section).Range)
+    Call FixPlaceholdersInRange(ActiveDocument.Sections(section).Range, style)
 End Sub
 
 Sub FixAllPlaceholdersInHeadersFooters(style As String)
     Dim sectionObj As section
+    Dim hfObj As HeaderFooter
     Dim rangeObj As Range
     
     For Each sectionObj In ActiveDocument.Sections
-        For Each rangeObj In sectionObj.Headers
-            Call FixPlaceholdersInRange(rangeObj, style)
+        For Each hfObj In sectionObj.Headers
+            Call FixPlaceholdersInRange(hfObj.Range, style)
+        Next
+        For Each hfObj In sectionObj.Footers
+            Call FixPlaceholdersInRange(hfObj.Range, style)
         Next
     Next
 End Sub
@@ -91,3 +94,4 @@ Sub FixBold(section As Integer)
     End With
     oFind.Execute FindText:="", ReplaceWith:="", Format:=True, Replace:=wdReplaceAll
 End Sub
+
