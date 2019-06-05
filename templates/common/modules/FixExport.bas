@@ -39,7 +39,7 @@ Sub FixPlaceholdersInRange(rangeObj As Range, style As String)
 
     For Each shp In rangeObj.ShapeRange
         ' only fix text boxes
-        If (shp.Type = MsoShapeType.msoTextBox) Then
+        If (shp.Type = MsoShapeType.msoTextBox) And (shp.name <> "Logo") Then
             
             shp.Select
             str = Selection.ShapeRange.TextFrame.TextRange.text
