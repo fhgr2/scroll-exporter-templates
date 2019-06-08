@@ -2,9 +2,19 @@ Attribute VB_Name = "Regulation_Macros"
 Sub ExitReadingLayout()
     If IsExported() Then
         If ShouldRunOnceAfterExport() Then
-            Call FixExport
-            Call FixIdentification
+            
+            ' Common
+            Call FixAllPlaceholdersInHeadersFooters("Inhaltssteuerelementtextbox")
+            Call FixPlaceholders(2, "Inhaltssteuerelementtextbox")
+            Call FixBold(4)
+            Call SetDocumentPropertiesFromShapeContents
+            ' Call FixTableOfContents
+            
+            ' specific
+            Call FixArticles
             Call FixTables
+            Call FixGestuetztAuf
+            
             SetRun (True)
         Else
             SetRun (False)
@@ -13,7 +23,7 @@ Sub ExitReadingLayout()
 
 End Sub
 
-Sub FixExport()
+Sub FixArticles()
     
     Const FirstLegalParagraphWithoutNumber As Boolean = False
     
@@ -26,21 +36,21 @@ Sub FixExport()
     Dim firstParagraphInArticle As Paragraph
     Dim countParagraphsInArticle As Integer
 
-      For Each curPar In ActiveDocument.Sections(2).Range.Paragraphs
+      For Each curPar In ActiveDocument.Sections(4).Range.Paragraphs
         Dim curParText As String
         Dim i As Integer
         
         curPar.Range.Select
         Selection.ClearParagraphDirectFormatting
         
-        If curPar.Style = "Überschrift 2" Then
+        If curPar.style = "Überschrift 2" Then
             If Not lastPar Is Nothing Then
                 lastPar.SpaceAfter = 6
             End If
         End If
         
-        If curPar.Style = "Überschrift 1" Then
-            curParText = curPar.Range.Text
+        If curPar.style = "Überschrift 1" Then
+            curParText = curPar.Range.text
             
             i = InStr(1, curParText, ". ")
             If i > 0 Then
@@ -48,11 +58,11 @@ Sub FixExport()
             End If
         End If
         
-        If curPar.Style = "Überschrift 2" Then
+        If curPar.style = "Überschrift 2" Then
             ' MsgBox ("yes")
             ' MsgBox (curPar.Range.Text)
             
-            curParText = curPar.Range.Text
+            curParText = curPar.Range.text
             
             i = 0
             If InStr(1, curParText, "Art. ") = 1 Then
@@ -69,15 +79,15 @@ Sub FixExport()
         End If
         
         ' if there is only one legal paragraph in an article there should be no number
-        If curPar.Style = "Überschrift 2" Then
+        If curPar.style = "Überschrift 2" Then
             If FirstLegalParagraphWithoutNumber And Not (firstParagraphInArticle Is Nothing) And countParagraphsInArticle = 1 Then
-                firstParagraphInArticle.Style = "Standard"
+                firstParagraphInArticle.style = "Standard"
             End If
             Set firstParagraphInArticle = Nothing
             countParagraphsInArticle = 0
             
         End If
-        If curPar.Style = "Scroll List Number" Or curPar.Style = "Standard" Then
+        If curPar.style = "Scroll List Number" Or curPar.style = "Standard" Then
             countParagraphsInArticle = countParagraphsInArticle + 1
             If firstParagraphInArticle Is Nothing Then
                 Set firstParagraphInArticle = curPar
@@ -88,47 +98,28 @@ Sub FixExport()
     Next
     
     If FirstLegalParagraphWithoutNumber And Not (firstParagraphInArticle Is Nothing) And countParagraphsInArticle = 1 Then
-        firstParagraphInArticle.Style = "Standard"
+        firstParagraphInArticle.style = "Standard"
     End If
 End Sub
-Sub FixIdentification()
-    Dim shp As Shape
-    Dim str As String
 
-    For Each shp In ActiveDocument.Shapes
-        ' Debug.Print (shp.Name)
-        If (shp.Type = MsoShapeType.msoTextBox) Then
 
-            shp.Select
-            str = Selection.ShapeRange.TextFrame.TextRange.Text
-            
-            ' Only first line
-            str = Split(str, Chr(13))(0)
-            ' Debug.Print (str)
-    
-            shp.TextFrame.TextRange.Delete
-            shp.TextFrame.DeleteText
-            shp.TextFrame.TextRange.ParagraphFormat.LineSpacingRule = wdLineSpaceSingle
-            shp.TextFrame.TextRange.ParagraphFormat.SpaceBefore = 0
-            shp.TextFrame.TextRange.Text = str
-            
-            ' Reset formating
-            shp.TextFrame.TextRange.Paragraphs(1).Style = "Inhaltssteuerelementtextbox"
-        End If
-    Next
+Sub FixGestuetztAuf()
+    Call FixPlaceholders(3, "Standard")
 End Sub
 
 ' Tables in Panels
 Sub FixTables()
     Dim tbl As Table
     
-    For Each tbl In ActiveDocument.Sections(2).Range.Tables
-        If tbl.Style = "Scroll Table Normal Wide" Then
+    For Each tbl In ActiveDocument.Sections(4).Range.Tables
+        If tbl.style = "Scroll Table Normal Wide" Then
             ' Debug.Print (tbl.Style)
-            tbl.Style = "Scroll Table Normal"
+            tbl.style = "Scroll Table Normal"
             tbl.PreferredWidthType = wdPreferredWidthPoints
             tbl.PreferredWidth = CentimetersToPoints(16)
             tbl.Rows.LeftIndent = tbl.Rows.LeftIndent - CentimetersToPoints(5.2)
+        Else
+            tbl.AutoFitBehavior (wdAutoFitWindow)
         End If
     Next
 End Sub
