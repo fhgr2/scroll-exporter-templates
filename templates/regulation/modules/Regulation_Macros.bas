@@ -15,6 +15,8 @@ Sub ExitReadingLayout()
             Call FixTables
             Call FixGestuetztAuf
             
+            Call FixSchusterjungen
+            
             SetRun (True)
         Else
             SetRun (False)
@@ -22,6 +24,129 @@ Sub ExitReadingLayout()
     End If
 
 End Sub
+
+Sub FixSchusterjungen()
+    Dim count As Integer
+    count = 0
+    Do While (FixSchusterjunge() And count < 10)
+        count = count + 1
+    Loop
+    Debug.Print (count)
+    
+End Sub
+
+Function FixSchusterjunge() As Boolean
+    Dim curPar As Paragraph
+    Dim lastPar As Paragraph
+    Dim firstParagraphInArticle As Paragraph
+    Dim firstArticleInChapter As Paragraph
+    Dim curArticle As Paragraph
+    Dim curChapter As Paragraph
+    Dim countParagraphsInArticle As Integer
+    Dim countArticlesInChapter As Integer
+    Dim pageChapter As Integer
+    Dim pageArticle As Integer
+    Dim pageFirstParagraph As Integer
+    Dim pageSecondParagraph As Integer
+    
+    pageFirstParagraph = 0
+    pageSecondParagraph = 0
+    
+    For Each curPar In ActiveDocument.Sections(4).Range.Paragraphs
+        Dim curParText As String
+        
+        ' Debug.Print (curPar.Range.Information(wdActiveEndAdjustedPageNumber))
+        ' Debug.Print (curPar.Range.text)
+        
+        If curPar.style = "Überschrift 1" Then
+            ' before
+        
+            ' update chapter
+            Set curChapter = curPar
+            pageChapter = curPar.Range.Information(wdActiveEndAdjustedPageNumber)
+            ' update article
+            Set firstArticleInChapter = Nothing
+            countArticlesInChapter = 0
+            
+            ' after
+        End If
+        
+        If curPar.style = "Überschrift 2" Then
+            ' before
+            
+            ' fix article
+            Set curArticle = curPar
+            If (countArticlesInChapter = 0) Then
+                Set firstArticleInChapter = curArticle
+            End If
+            countArticlesInChapter = countArticlesInChapter + 1
+            pageArticle = curPar.Range.Information(wdActiveEndAdjustedPageNumber)
+            ' fix paragraph
+            pageFirstParagraph = 0
+            pageSecondParagraph = 0
+            countParagraphsInArticle = 0
+            Set firstParagraphInArticle = Nothing
+            
+            ' after
+            If (countArticlesInChapter = 1) Then
+                pageFirstArticle = curPar.Range.Information(wdActiveEndAdjustedPageNumber)
+                If (pageFirstArticle > pageChapter) Then
+                    curChapter.Range.Select
+                    Selection.ParagraphFormat.PageBreakBefore = True
+                    FixSchusterjunge = True
+                    Exit Function
+                End If
+            End If
+        
+        
+        End If
+        
+                
+        If curPar.style = "Scroll List Number" Or curPar.style = "Standard" Then
+            ' before
+            
+            ' fix paragraph
+            countParagraphsInArticle = countParagraphsInArticle + 1
+            If (countParagraphsInArticle = 1) Then
+                Set firstParagraphInArticle = curPar
+                pageFirstParagraph = curPar.Range.Information(wdActiveEndAdjustedPageNumber)
+            End If
+            If (countParagraphsInArticle = 2) Then
+                pageSecondParagraph = curPar.Range.Information(wdActiveEndAdjustedPageNumber)
+            End If
+                
+            ' after
+            If (countParagraphsInArticle = 1) Then
+                If (pageArticle < pageFirstParagraph) Then
+                    curArticle.Range.Select
+                    Selection.ParagraphFormat.PageBreakBefore = True
+                    FixSchusterjunge = True
+                    Exit Function
+                End If
+            End If
+            
+            If (countParagraphsInArticle = 2) Then
+                If (pageSecondParagraph > pageFirstParagraph) Then
+                    Debug.Print ("Schusterjunge")
+                    ' Debug.Print (curArticle.Range.text)
+                    ' curArticle.Range.InsertBefore ("X")
+                    If (countArticlesInChapter = 1) Then
+                        curChapter.Range.Select
+                    Else
+                        curArticle.Range.Select
+                    End If
+                    Selection.ParagraphFormat.PageBreakBefore = True
+                    FixSchusterjunge = True
+                    Exit Function
+                End If
+            End If
+        End If
+        
+        Set lastPar = curPar
+    Next
+    FixSchusterjunge = False
+
+End Function
 
 Sub FixArticles()
     
@@ -121,6 +246,9 @@ Sub FixTables()
         Else
             tbl.AutoFitBehavior (wdAutoFitWindow)
         End If
+        tbl.Select
+        Selection.ParagraphFormat.KeepWithNext = True
+
     Next
 End Sub
 
