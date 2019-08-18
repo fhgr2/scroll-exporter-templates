@@ -1,9 +1,15 @@
 Attribute VB_Name = "Regulation_Macros"
 Sub ExitReadingLayout()
+
+
     If IsExported() Then
         If ShouldRunOnceAfterExport() Then
+        
+            progressBar.Show (True)
             
             ' Common
+            progressBar.tasksTextBox.text = "Allgemeine Korrekturen"
+            
             Call FixAllPlaceholdersInHeadersFooters("Inhaltssteuerelementtextbox")
             Call FixPlaceholders(2, "Inhaltssteuerelementtextbox")
             Call FixBold(4)
@@ -11,13 +17,17 @@ Sub ExitReadingLayout()
             ' Call FixTableOfContents
             
             ' specific
+            progressBar.tasksTextBox.text = "Reglements-spezifische Korrekturen"
+            
             Call FixArticles
             Call FixTables
             Call FixGestuetztAuf
-            
+            Call RemoveEmptyBasis
             Call FixSchusterjungen
             
             SetRun (True)
+            
+            progressBar.Hide
         Else
             SetRun (False)
         End If
@@ -251,4 +261,27 @@ Sub FixTables()
 
     Next
 End Sub
+
+Sub RemoveEmptyBasis()
+    Dim oShape As Shape
+    Dim text As String
+    
+    Set oShape = GetShape("basis")
+    If oShape Is Nothing Then
+        Exit Sub
+    End If
+    text = oShape.TextFrame.TextRange.text
+    If Len(text) > 5 Then
+        Exit Sub
+    End If
+    
+    ' Remove
+    Dim oRange As Range
+    Set oRange = ActiveDocument.Bookmarks("basis").Range
+    If oRange Is Nothing Then
+        Exit Sub
+    End If
+    oRange.Delete
+End Sub
+
 
