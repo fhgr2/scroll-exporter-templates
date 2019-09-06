@@ -1,14 +1,14 @@
 Attribute VB_Name = "Regulation_Macros"
 Sub ExitReadingLayout()
 
-
     If IsExported() Then
         If ShouldRunOnceAfterExport() Then
         
-            progressBar.Show (True)
+            progressBar.Show (vbModeless)
             
             ' Common
             progressBar.tasksTextBox.text = "Allgemeine Korrekturen"
+            DoEvents
             
             Call FixAllPlaceholdersInHeadersFooters("Inhaltssteuerelementtextbox")
             Call FixPlaceholders(2, "Inhaltssteuerelementtextbox")
@@ -18,11 +18,18 @@ Sub ExitReadingLayout()
             
             ' specific
             progressBar.tasksTextBox.text = "Reglements-spezifische Korrekturen"
+            DoEvents
             
+            progressBar.tasksTextBox.text = "Formatierung von Artikeln korrigieren... "
+            DoEvents
             Call FixArticles
+            
             Call FixTables
             Call FixGestuetztAuf
             Call RemoveEmptyBasis
+            
+            progressBar.tasksTextBox.text = "Layout korrigieren... "
+            DoEvents
             Call FixSchusterjungen
             
             SetRun (True)
@@ -128,10 +135,12 @@ Function FixSchusterjunge() As Boolean
             ' after
             If (countParagraphsInArticle = 1) Then
                 If (pageArticle < pageFirstParagraph) Then
-                    curArticle.Range.Select
-                    Selection.ParagraphFormat.PageBreakBefore = True
-                    FixSchusterjunge = True
-                    Exit Function
+                    If Not (curArticle Is Nothing) Then
+                        curArticle.Range.Select
+                        Selection.ParagraphFormat.PageBreakBefore = True
+                        FixSchusterjunge = True
+                        Exit Function
+                    End If
                 End If
             End If
             
