@@ -8,7 +8,7 @@ Sub SetShouldRunOnceAfterExport(hasRun As Boolean)
 End Sub
 
 Public Function IsExported() As Boolean
-    IsExported = Not (ActiveDocument.Range.Find.Execute("$scroll.content"))
+    IsExported = Not (ActiveDocument.Range.Find.Execute("$scroll.content") Or ActiveDocument.Range.Find.Execute("$scroll.title"))
 End Function
 
 Private Sub EnsureHasBooleanCustomPropertyIfNeeded(name As String)

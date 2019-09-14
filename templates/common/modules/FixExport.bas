@@ -1,4 +1,4 @@
-' See https://github.com/htwchur/scroll-exporter-templates/issues/14
+Attribute VB_Name = "FixExport"
 Sub FixTableOfContents()
     For Each toc In ActiveDocument.TablesOfContents
         toc.Update
