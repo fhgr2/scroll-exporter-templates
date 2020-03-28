@@ -8,7 +8,17 @@ Sub SetShouldRunOnceAfterExport(hasRun As Boolean)
 End Sub
 
 Public Function IsExported() As Boolean
-    IsExported = Not (ActiveDocument.Range.Find.Execute("$scroll.content") Or ActiveDocument.Range.Find.Execute("$scroll.title"))
+    Dim oShape As Shape
+    Set oShape = GetShape("title")
+    If Not oShape Is Nothing And oShape.TextFrame.TextRange.Find.Execute("$scroll.title") Then
+        IsExported = False
+        Exit Function
+    End If
+    If ActiveDocument.Range.Find.Execute("$scroll.title") Then
+        IsExported = False
+        Exit Function
+    End If
+    IsExported = True
 End Function
 
 Private Sub EnsureHasBooleanCustomPropertyIfNeeded(name As String)
@@ -72,6 +82,4 @@ Set dp = GetCustomProperty(name)
 dp.Value = hasRun
 
 End Sub
-
-
 
