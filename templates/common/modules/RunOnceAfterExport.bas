@@ -76,10 +76,13 @@ Public Sub SetRun(hasRun As Boolean)
     Dim name As String
     name = "HasRun"
 
-Dim dp As DocumentProperty
-Set dp = GetCustomProperty(name)
+	Dim dp As DocumentProperty
+	Set dp = GetCustomProperty(name)
 
-dp.Value = hasRun
+	dp.Value = hasRun
 
 End Sub
 
+Public Sub SetRunTopFalse()
+	SetRun(False)
+End Sub
